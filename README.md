@@ -201,7 +201,7 @@ $$
 The resulting problem is:
 
 $$
-\underset{x \geq 0}{\operatorname{minimize}}
+\min_{x \geq 0}
 \left[
 \frac{1}{2}\lVert Ax-b\rVert_2^2
 +
