@@ -169,51 +169,54 @@ Changing the loop ordering in either script requires updating the indexing conve
 
 For each track and voxel intersection, the matrix element is calculated as:
 
-[
+$$
 A_{ij} = \ell_{ij}\left(\frac{dE}{dx}\right),
-]
+$$
 
 where:
 
-* (\ell_{ij}) is the length of track (i) inside voxel (j),
-* (dE/dx) is the assumed muon energy loss.
+- $\ell_{ij}$ is the length of track $i$ inside voxel $j$,
+- $dE/dx$ is the assumed muon energy loss.
 
 The example code uses:
 
-[
+$$
 \frac{dE}{dx} = 2.1\ \mathrm{MeV/cm}.
-]
+$$
 
-The reconstructed values therefore have units of PE/MeV when the observation vector contains detected photoelectrons or detected-photon counts interpreted as photoelectrons.
+The reconstructed values therefore have units of PE/MeV when the observation
+vector contains detected photoelectrons, or detected-photon counts interpreted
+as photoelectrons.
 
 ## Smoothness regularization
 
 The optional smoothness term penalizes differences between neighboring voxels:
 
-[
+$$
 \frac{\lambda}{2}
 \sum_{\langle j,k\rangle}
-(x_j-x_k)^2.
-]
+\left(x_j-x_k\right)^2.
+$$
 
 The resulting problem is:
 
-[
-\underset{x\geq 0}{\operatorname{minimize}}
+$$
+\underset{x \geq 0}{\operatorname{minimize}}
 \left[
 \frac{1}{2}\lVert Ax-b\rVert_2^2
 +
 \frac{\lambda}{2}
 \sum_{\langle j,k\rangle}
-(x_j-x_k)^2
+\left(x_j-x_k\right)^2
 \right].
-]
+$$
 
-Each voxel is connected to its immediate neighbors along the x, y, and z directions. Each neighbor pair is counted once.
+Each voxel is connected to its immediate neighbors along the x, y, and z
+directions. Each neighboring pair is counted once.
 
 Set `--lambda-smooth 0` to disable regularization.
 
-The appropriate value of (\lambda) depends on the dataset, voxel resolution, event count, detector geometry, and scaling of the linear system. It should generally be selected through a scan using a suitable validation metric rather than assumed to be universal.
+The appropriate value of (lambda) depends on the dataset, voxel resolution, event count, detector geometry, and scaling of the linear system. It should generally be selected through a scan using a suitable validation metric rather than assumed to be universal.
 
 ## Running the solver
 
@@ -382,8 +385,10 @@ The example Angelo2 dataset may contain billions of detected-photon records. Rea
 
 Increasing `ndiv` increases the number of unknowns as:
 
+$$
 [
 N_{\mathrm{voxels}} = \mathrm{ndiv}^3.
 ]
+$$
 
 The current example tests every accepted trajectory against every voxel. Consequently, the matrix-construction cost grows rapidly with both event count and voxel resolution.
