@@ -18,7 +18,7 @@ The solution is constrained to be nonnegative and may include nearest-neighbor L
 
 ## Repository contents
 
-### `pds_cal_gen_scipy_sparse_l2smooth_public.py`
+### `pds_cal_gen_scipy_sparse_l2smooth.py`
 
 Python reconstruction script that:
 
@@ -223,7 +223,7 @@ The appropriate value of (lambda) depends on the dataset, voxel resolution, even
 A typical reconstruction command is:
 
 ```bash
-python3 pds_cal_gen_scipy_sparse_l2smooth_public.py \
+python3 pds_cal_gen_scipy_sparse_l2smooth.py \
     --data-dir data/angelo2_config \
     --ndiv 12 \
     --num-events 60000 \
@@ -242,7 +242,7 @@ The main arguments are:
 For an unregularized solution:
 
 ```bash
-python3 pds_cal_gen_scipy_sparse_l2smooth_public.py \
+python3 pds_cal_gen_scipy_sparse_l2smooth.py \
     --data-dir data/angelo2_config \
     --ndiv 12 \
     --num-events 60000 \
@@ -253,7 +253,7 @@ python3 pds_cal_gen_scipy_sparse_l2smooth_public.py \
 When `liang_barsky.C` is not located beside the Python script, provide its path explicitly:
 
 ```bash
-python3 pds_cal_gen_scipy_sparse_l2smooth_public.py \
+python3 pds_cal_gen_scipy_sparse_l2smooth.py \
     --data-dir data/angelo2_config \
     --liang-barsky /full/path/to/liang_barsky.C \
     --ndiv 12 \
@@ -339,7 +339,7 @@ A typical local directory structure is:
 
 ```text
 LY_mapping/
-├── pds_cal_gen_scipy_sparse_l2smooth_public.py
+├── pds_cal_gen_scipy_sparse_l2smooth.py
 ├── liang_barsky.C
 ├── pds_cal_plot.C
 ├── data/
