@@ -1,0 +1,50 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Python and Conda environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+conda-meta/
+
+# Environment variables and credentials
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# Generated scientific data
+*.root
+*.npz
+*.npy
+
+# Generated reconstruction results
+solutions/
+outputs/
+output/
+results/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*~
+.DS_Store
+
+# Build products
+build/
+dist/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
