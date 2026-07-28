@@ -53,6 +53,7 @@
 #include <array>
 #include <limits>
 #include <vector>
+#include <string>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -71,8 +72,12 @@ void pds_cal_plot()
 	float zmin = -300;
 	float zmax = 600;
 
+    const char* plots_dir = "solution_plots/lambda500"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
+
 	std::vector<double> x;
-	std::ifstream x_in("angelo2_12x12x12_60000evts_lambda3e6.txt");
+	//std::ifstream x_in("angelo2_12x12x12_60000evts_lambda3e6.txt");
+	// std::ifstream x_in("solutions/16x16x16_unregularized.txt");
+	std::ifstream x_in("solutions/16x16x16_lambda500.txt");
 
 	if (!x_in) {
     	std::cerr << "Error: could not open input file\n";
@@ -155,8 +160,8 @@ void pds_cal_plot()
     h_yx->GetZaxis()->SetTitleOffset(1.25);
     h_yx->GetZaxis()->RotateTitle(true);
     h_yx->Draw("COLZ");
-    c_yx->SaveAs(Form("test_plot/sum_h_yx_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_yx->SaveAs(Form("test_plot/sum_h_yx_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_yx->SaveAs(Form("%s/sum_h_yx_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_yx->SaveAs(Form("%s/sum_h_yx_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
     // YX average projection
     TH2D* h_yx_avg = (TH2D*)h_yx->Clone("h_yx_avg");
@@ -172,8 +177,8 @@ void pds_cal_plot()
     h_yx_avg->GetZaxis()->SetTitleOffset(1.25);
     h_yx_avg->GetZaxis()->RotateTitle(true);
     h_yx_avg->Draw("COLZ");
-    c_yx_avg->SaveAs(Form("test_plot/avg_h_yx_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_yx_avg->SaveAs(Form("test_plot/avg_h_yx_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_yx_avg->SaveAs(Form("%s/avg_h_yx_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_yx_avg->SaveAs(Form("%s/avg_h_yx_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
     // -------------------------
     // ZX summed projection
@@ -191,8 +196,8 @@ void pds_cal_plot()
     h_zx->GetZaxis()->SetTitleOffset(1.25);
     h_zx->GetZaxis()->RotateTitle(true);
     h_zx->Draw("COLZ");
-    c_zx->SaveAs(Form("test_plot/sum_h_zx_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_zx->SaveAs(Form("test_plot/sum_h_zx_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_zx->SaveAs(Form("%s/sum_h_zx_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_zx->SaveAs(Form("%s/sum_h_zx_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
     // ZX average projection
     TH2D* h_zx_avg = (TH2D*)h_zx->Clone("h_zx_avg");
@@ -208,8 +213,8 @@ void pds_cal_plot()
     h_zx_avg->GetZaxis()->SetTitleOffset(1.25);
     h_zx_avg->GetZaxis()->RotateTitle(true);
     h_zx_avg->Draw("COLZ");
-    c_zx_avg->SaveAs(Form("test_plot/avg_h_zx_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_zx_avg->SaveAs(Form("test_plot/avg_h_zx_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_zx_avg->SaveAs(Form("%s/avg_h_zx_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_zx_avg->SaveAs(Form("%s/avg_h_zx_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
     // -------------------------
     // YZ summed projection
@@ -227,8 +232,8 @@ void pds_cal_plot()
     h_yz->GetZaxis()->SetTitleOffset(1.25);
     h_yz->GetZaxis()->RotateTitle(true);
     h_yz->Draw("COLZ");
-    c_yz->SaveAs(Form("test_plot/sum_h_yz_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_yz->SaveAs(Form("test_plot/sum_h_yz_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_yz->SaveAs(Form("%s/sum_h_yz_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_yz->SaveAs(Form("%s/sum_h_yz_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
     // YZ average projection
     TH2D* h_yz_avg = (TH2D*)h_yz->Clone("h_yz_avg");
@@ -244,8 +249,8 @@ void pds_cal_plot()
     h_yz_avg->GetZaxis()->SetTitleOffset(1.25);
     h_yz_avg->GetZaxis()->RotateTitle(true);
     h_yz_avg->Draw("COLZ");
-    c_yz_avg->SaveAs(Form("test_plot/avg_h_yz_%dx%d_nnls_test.png", ndiv, ndiv));
-    c_yz_avg->SaveAs(Form("test_plot/avg_h_yz_%dx%d_nnls_test.pdf", ndiv, ndiv));
+    c_yz_avg->SaveAs(Form("%s/avg_h_yz_%dx%d_nnls_test.png", plots_dir, ndiv, ndiv));
+    c_yz_avg->SaveAs(Form("%s/avg_h_yz_%dx%d_nnls_test.pdf", plots_dir, ndiv, ndiv));
 
 	// Slices
 	TCanvas* c_yx_slice = new TCanvas("c_yx_slice", "Canvas", 800, 600);
@@ -279,7 +284,7 @@ void pds_cal_plot()
 	    h_yx_slice->GetZaxis()->RotateTitle(true);
 	    h_yx_slice->Draw("COLZ");
 
-	    c_yx_slice->SaveAs(Form("test_plot/h_yx_%dx%d_nnls_slice_%d.png", ndiv, ndiv, iz - 1));
+	    c_yx_slice->SaveAs(Form("%s/h_yx_%dx%d_nnls_slice_%d.png", plots_dir, ndiv, ndiv, iz - 1));
 
 	    delete h_yx_slice;
 	}
@@ -318,7 +323,7 @@ void pds_cal_plot()
 	    h_zx_slice->GetZaxis()->RotateTitle(true);
 	    h_zx_slice->Draw("COLZ");
 
-	    c_zx_slice->SaveAs(Form("test_plot/h_zx_%dx%d_nnls_slice_%d.png", ndiv, ndiv, iy - 1));
+	    c_zx_slice->SaveAs(Form("%s/h_zx_%dx%d_nnls_slice_%d.png", plots_dir, ndiv, ndiv, iy - 1));
 
 	    delete h_zx_slice;
 	}
@@ -357,7 +362,7 @@ void pds_cal_plot()
 	    h_yz_slice->GetZaxis()->RotateTitle(true);
 	    h_yz_slice->Draw("COLZ");
 
-	    c_yz_slice->SaveAs(Form("test_plot/h_yz_%dx%d_nnls_slice_%d.png", ndiv, ndiv, ix - 1));
+	    c_yz_slice->SaveAs(Form("%s/h_yz_%dx%d_nnls_slice_%d.png", plots_dir, ndiv, ndiv, ix - 1));
 
 	    delete h_yz_slice;
 	}

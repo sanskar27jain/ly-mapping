@@ -41,10 +41,10 @@ from array import array
 from pathlib import Path
 
 import numpy as np
-import tables as tab # pyright: ignore[reportMissingImports]
+import tables as tab
 import ROOT
-from scipy.optimize import lsq_linear # pyright: ignore[reportMissingImports]
-from scipy.sparse import csr_matrix, vstack # pyright: ignore[reportMissingImports]
+from scipy.optimize import lsq_linear 
+from scipy.sparse import csr_matrix, vstack 
 
 
 ROOT.gROOT.SetBatch(True)
@@ -309,7 +309,7 @@ def project_segment_to_detector_bounds(start, end, flipped=False):
             proj_end = tentative_proj_end
     if not flipped:
         proj_start = project_segment_to_detector_bounds(end, start, flipped=True)
-        return proj_end, proj_start
+        return proj_start, proj_end
     else:
         return proj_end
 #################
