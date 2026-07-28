@@ -53,11 +53,20 @@ ROOT.gROOT.SetBatch(True)
 # replace when adapting the example to another detector or simulation sample.
 # TRAJECTORY_TREE = "TrajCut/CRTTrajectoryCut"
 # PHOTON_TREE = "XAresponse/DetectedPhotons"
+
+# Full detector module
 DETECTOR_BOUNDS = {
     "x": (-400.0, 400.0),
     "y": (-425.0, 425.0),
     "z": (-300.0, 600.0),
 }
+# Focused around active volume
+# DETECTOR_BOUNDS = {
+#     "x": (-360.0, 360.0),
+#     "y": (-425.0, 425.0),   # Can't narrow further without removing membrane PDs
+#     "z": (-100.0, 400.0),   # to get the PMTs
+# }
+
 
 # Angelo2 channels retained for the no-PMT reconstruction.
 # SELECTED_OP_CHANNELS = {
@@ -281,7 +290,7 @@ def get_trajectory_start_end(trajectory_table_row : tab.tableextension.Row):
         return start, end
     else:
         # If any of the four points lie outside the allowed bounds, exit.
-        for ax, bounds in reco_track_point_bounds.keys():
+        for ax, bounds in reco_track_point_bounds.items():
             if np.any( [ ((coords[k] < bounds[0]) or (coords[k] > bounds[1])) for k in (f"{ax}_ini",f"{ax}_end") ] ):
                 return None
 
@@ -408,7 +417,7 @@ def build_linear_system(trajectory_table, ndiv, num_events):
             cols,
             values,
         )
-        tracks_used += 1 # append it here so that tracks_used accurately reflects a 0-referenced index of the final matrix.
+        tracks_used += 1 # append it here so that tracks_used accurately reflects a 0-referenced row_index of the final matrix.
 
         # if (row_index + 1) % 1000 == 0 or row_index + 1 == events_to_use:
         #     print(f"Built {row_index + 1}/{events_to_use} event rows")
@@ -462,6 +471,7 @@ def build_l2_smoothness_matrix(ndiv):
 
 def add_smoothness(A, b, ndiv, lambda_smooth):
     """Augment [A, b] with sqrt(lambda) L and a zero target."""
+    # sqrt(lambda)L * x will return a vector with differences between each voxel and one of its neighbors, smoothness means we want the differences between neighbors to be zero, hence why we add a zero target -- the solver will try to solve for sqrt(lambda)L x = 0 and in doing so minimize lambda*Sum ((x_i - x_j)^2).   
     if lambda_smooth == 0.0:
         return A, b
 
@@ -535,6 +545,11 @@ def main():
     # photon_counts = count_detected_photons(photon_chain)
 
     trajectory_table = read_tracks_info_file(args.data_file)
+
+    print("Detector bounds to be used:")
+    print(f"x: {DETECTOR_BOUNDS['x'][0]}, {DETECTOR_BOUNDS['x'][1]}")
+    print(f"y: {DETECTOR_BOUNDS['y'][0]}, {DETECTOR_BOUNDS['y'][1]}")
+    print(f"z: {DETECTOR_BOUNDS['z'][0]}, {DETECTOR_BOUNDS['z'][1]}\n")
 
     # A, b = build_linear_system(
     #     trajectory_chain,
