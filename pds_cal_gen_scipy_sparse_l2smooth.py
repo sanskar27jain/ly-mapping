@@ -16,7 +16,7 @@ the fit also penalizes differences between neighboring voxels:
        + 0.5 lambda sum_neighbors (x_j - x_k)^2,
     subject to x >= 0.
 
-This is intentionally an Angelo2-specific example rather than a general data
+This is intentionally a specific example rather than a general data
 loader. To use another dataset, update the file naming, ROOT trees/branches,
 optical-channel selection, detector bounds, and any desired event cuts.
 
@@ -29,11 +29,11 @@ Requirements
 Example
 -------
 python3 pds_cal_gen_scipy_sparse_l2smooth.py \
-    --data-dir data/angelo2_config \
+    --data-dir path/to/data/ \
     --ndiv 16 \
     --num-events 60000 \
     --lambda-smooth 1e6 \
-    --outname solutions/angelo2_16x16x16_60000evts_lambda1e6.txt
+    --outname solutions/test_16x16x16_60000evts_lambda1e6.txt
 """
 
 import argparse
@@ -59,7 +59,7 @@ DETECTOR_BOUNDS = {
     "z": (-300.0, 600.0),
 }
 
-# Angelo2 channels retained for the no-PMT reconstruction.
+# Channels retained for the no-PMT reconstruction.
 SELECTED_OP_CHANNELS = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 22, 23,
 }
@@ -78,20 +78,20 @@ def parse_args():
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=Path("data/angelo2_config"),
-        help="Directory containing the Angelo2 ROOT files.",
+        default=Path("data/"),
+        help="Directory containing ROOT files.",
     )
     parser.add_argument(
         "--first-run",
         type=int,
         default=0,
-        help="First Angelo2 run index.",
+        help="First run index.",
     )
     parser.add_argument(
         "--num-files",
         type=int,
         default=120,
-        help="Number of sequential Angelo2 files to use.",
+        help="Number of sequential files to use.",
     )
     parser.add_argument(
         "--num-events",
@@ -172,10 +172,10 @@ def load_liang_barsky(source_path):
         raise RuntimeError(f"Failed to compile Liang-Barsky source: {source_path}")
 
 
-def build_angelo2_file_list(data_dir, first_run, num_files):
-    """Construct the Angelo2 filenames used by this example."""
+def build_file_list(data_dir, first_run, num_files):
+    """Construct the filenames used by this example."""
     return [
-        data_dir / f"angelo2_run{run}_rsl100_abs20_500evts.root"
+        data_dir / f"run{run}_rsl100_abs20_500evts.root"
         for run in range(first_run, first_run + num_files)
     ]
 
@@ -388,7 +388,7 @@ def output_path(args):
         tag = f"lambda{value.replace('.', 'p')}"
 
     return Path(
-        f"solutions/angelo2_{args.ndiv}x{args.ndiv}x{args.ndiv}_"
+        f"solutions/test_{args.ndiv}x{args.ndiv}x{args.ndiv}_"
         f"{args.num_events}evts_{tag}.txt"
     )
 
@@ -410,7 +410,7 @@ def main():
         raise ValueError("--first-run and --lambda-smooth must be non-negative")
 
     load_liang_barsky(args.liang_barsky)
-    files = build_angelo2_file_list(args.data_dir, args.first_run, args.num_files)
+    files = build_file_list(args.data_dir, args.first_run, args.num_files)
     trajectory_chain, photon_chain = build_chains(files)
 
     print(f"Trajectory entries: {trajectory_chain.GetEntries()}")

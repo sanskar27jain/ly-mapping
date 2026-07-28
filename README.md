@@ -96,8 +96,8 @@ No large input datasets or generated reconstruction files are included in this r
 The example solver is configured for Angelo2 ROOT files with names of the form:
 
 ```text
-angelo2_run0_rsl100_abs20_500evts.root
-angelo2_run1_rsl100_abs20_500evts.root
+run0_rsl100_abs20_500evts.root
+run1_rsl100_abs20_500evts.root
 ...
 ```
 
@@ -224,11 +224,11 @@ A typical reconstruction command is:
 
 ```bash
 python3 pds_cal_gen_scipy_sparse_l2smooth.py \
-    --data-dir data/angelo2_config \
+    --data-dir path/to/data/ \
     --ndiv 12 \
     --num-events 60000 \
     --lambda-smooth 3e6 \
-    --outname solutions/angelo2_12x12x12_60000evts_lambda3e6.txt
+    --outname solutions/test_12x12x12_60000evts_lambda3e6.txt
 ```
 
 The main arguments are:
@@ -243,23 +243,23 @@ For an unregularized solution:
 
 ```bash
 python3 pds_cal_gen_scipy_sparse_l2smooth.py \
-    --data-dir data/angelo2_config \
+    --data-dir path/to/data/ \
     --ndiv 12 \
     --num-events 60000 \
     --lambda-smooth 0 \
-    --outname solutions/angelo2_12x12x12_60000evts_unregularized.txt
+    --outname solutions/test_12x12x12_60000evts_unregularized.txt
 ```
 
 When `liang_barsky.C` is not located beside the Python script, provide its path explicitly:
 
 ```bash
 python3 pds_cal_gen_scipy_sparse_l2smooth.py \
-    --data-dir data/angelo2_config \
+    --data-dir path/to/data/ \
     --liang-barsky /full/path/to/liang_barsky.C \
     --ndiv 12 \
     --num-events 60000 \
     --lambda-smooth 3e6 \
-    --outname solutions/angelo2_12x12x12_60000evts_lambda3e6.txt
+    --outname solutions/test_12x12x12_60000evts_lambda3e6.txt
 ```
 
 Create the output directory before running if necessary:
@@ -343,7 +343,7 @@ LY_mapping/
 ├── liang_barsky.C
 ├── pds_cal_plot.C
 ├── data/
-│   └── angelo2_config/
+│   └── specific_dataset/
 ├── solutions/
 └── test_plot/
 ```
