@@ -65,6 +65,7 @@
 
 void pds_cal_plot()
 {
+    // full detector bounds
 	float xmin = -400;
 	float xmax = 400;
 	float ymin = -425;
@@ -72,12 +73,29 @@ void pds_cal_plot()
 	float zmin = -300;
 	float zmax = 600;
 
-    const char* plots_dir = "solution_plots/lambda500"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
+    // focus on active volume
+    // float xmin = -360;
+    // float xmax = 360;
+    // float ymin = -425;
+    // float ymax = 425;
+    // float zmin = -100;
+    // float zmax = 400;
+
+    // strictly active volume
+    // float xmin = -338.5;
+    // float xmax = 338.5;
+    // float ymin = -334;
+    // float ymax = 334;
+    // float zmin = 0;
+    // float zmax = 300;
+
+    const char* plots_dir = "solution_plots/12_fD_unreg_anode_crossers_int_point_chk_10_rc"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
 
 	std::vector<double> x;
 	//std::ifstream x_in("angelo2_12x12x12_60000evts_lambda3e6.txt");
-	// std::ifstream x_in("solutions/16x16x16_unregularized.txt");
-	std::ifstream x_in("solutions/16x16x16_lambda500.txt");
+	// std::ifstream x_in("solutions/10x10x10_unregularized_fullD.txt");
+	std::ifstream x_in("solutions/12x12x12_unreg_fD_anode_crossers_int_point_chk_10_rc.txt");
+	// std::ifstream x_in("solutions/16x16x16_lambda500.txt");
 
 	if (!x_in) {
     	std::cerr << "Error: could not open input file\n";
@@ -112,7 +130,7 @@ void pds_cal_plot()
             for (int ix = 0; ix < ndiv; ++ix)
 			{
 				//if (x[ix + iy*ndiv + iz*pow(ndiv,2)] < 3000){
-					h_xyz->SetBinContent(iy + 1, ix + 1, iz + 1, x[ix + iy*ndiv + iz*pow(ndiv,2)]);  // Bin numbers start from 1 in ROOT
+					h_xyz->SetBinContent(ix + 1, iy + 1, iz + 1, x[ix + iy*ndiv + iz*pow(ndiv,2)]);  // Bin numbers start from 1 in ROOT
 				//}
         	}	
 		}

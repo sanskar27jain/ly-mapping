@@ -66,6 +66,12 @@ DETECTOR_BOUNDS = {
 #     "y": (-425.0, 425.0),   # Can't narrow further without removing membrane PDs
 #     "z": (-100.0, 400.0),   # to get the PMTs
 # }
+# Active volume
+# DETECTOR_BOUNDS = {
+#     "x": (-338.5, 338.5),
+#     "y": (-334.0, 334.0),
+#     "z": (0,      300.0),
+# }
 
 
 # Angelo2 channels retained for the no-PMT reconstruction.
@@ -76,6 +82,15 @@ DETECTOR_BOUNDS = {
 MIP_ENERGY_LOSS = 2.1  # MeV/cm
 NO_INTERSECTION = -999.0
 
+## For exclusion of tracks with reconstructed start/end points within active volume interior
+ACTIVE_VOLUME_BOUNDS = {
+    "x": (-338.5, 338.5),
+    "y": (-334.0, 334.0),
+    "z": (0,      300.0),
+}  
+active_v_lower_bounds = np.array([av_bounds[0] for ax, av_bounds in ACTIVE_VOLUME_BOUNDS.items()])
+active_v_upper_bounds = np.array([av_bounds[1] for ax, av_bounds in ACTIVE_VOLUME_BOUNDS.items()])
+inside_xyz_bounds_by_margin = lambda point, margin : ((point - active_v_lower_bounds) > margin) & ((active_v_upper_bounds - point) > margin) 
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -111,7 +126,7 @@ def parse_args():
     parser.add_argument(
         "--num-events",
         type=int,
-        default=5000,
+        default=150000,
         help="Maximum number of trajectory entries to reconstruct.",
     )
     parser.add_argument(
@@ -142,6 +157,19 @@ def parse_args():
         ),
     )
     parser.add_argument(
+        "--entries-list",
+        type=Path,
+        default=None,
+        help=("Path to a txt file with a list of indices (one on each line) ",
+              "pointing to specific rows of the trajectory table to be used by the solver. Overrides num-events."),
+    )
+    parser.add_argument(
+        "--interior-exclusion",
+        type=int,
+        default=-1,
+        help="Margin in cm with which to exclude tracks whose start/end points lie in active volume interior. -1 for no exclusion.",
+    )
+    parser.add_argument(
         "--outname",
         type=Path,
         default=None,
@@ -169,15 +197,15 @@ def load_liang_barsky(source_path):
         #include "{include_path}"
 
         std::vector<double> liang_barsky_3d_py(
+            double x0, double x1,
             double y0, double y1,
             double z0, double z1,
-            double x0, double x1,
-            double ey, double ez, double ex,
-            double xy, double xz, double xx
+            double ex, double ey, double ez, 
+            double xx, double xy, double xz 
         ) {{
             auto result = liang_barsky_3d(
-                y0, y1, z0, z1, x0, x1,
-                ey, ez, ex, xy, xz, xx
+                x0, x1, y0, y1, z0, z1,
+                ex, ey, ez, xx, xy, xz
             );
             return std::vector<double>(result.begin(), result.end());
         }}
@@ -258,7 +286,7 @@ def read_tracks_info_file(trk_info_file_path):
     return trk_info_table 
 
 
-def get_trajectory_start_end(trajectory_table_row : tab.tableextension.Row):
+def get_trajectory_start_end(trajectory_table_row : tab.tableextension.Row, exclude_interior_tracks=-1):
     """Get the start and end points of each trajectory from the hdf5 table"""
     reco_track_point_bounds = DETECTOR_BOUNDS.copy()
     reco_track_point_bounds['x'] = (-345, 345) # The (lardon z) (larsoft x) values are computed from e drift times referenced to estimated t0 (actual track-crossing time). It should be impossible to get a (larsoft) x significantly outside active volume unless t0 estimation is wrong (if the first e- reached the anode "before the track even crossed"). 
@@ -287,7 +315,6 @@ def get_trajectory_start_end(trajectory_table_row : tab.tableextension.Row):
         # Note: at this point the cc_ini --> end distance ought to be the largest among the four points involved. Can check this externally 
         start = np.array([ coords['cc_x_ini'], coords['cc_y_ini'], coords['cc_z_ini'] ])
         end   = np.array([ coords['x_end'],    coords['y_end'],    coords['z_end'] ])
-        return start, end
     else:
         # If any of the four points lie outside the allowed bounds, exit.
         for ax, bounds in reco_track_point_bounds.items():
@@ -296,7 +323,14 @@ def get_trajectory_start_end(trajectory_table_row : tab.tableextension.Row):
 
         start = np.array([ coords['x_ini'], coords['y_ini'], coords['z_ini'] ])
         end   = np.array([ coords['x_end'], coords['y_end'], coords['z_end'] ])
+
+    if exclude_interior_tracks < 0:
         return start, end
+    start_in_av_interior = np.all(inside_xyz_bounds_by_margin(start, exclude_interior_tracks))
+    end_in_av_interior   = np.all(inside_xyz_bounds_by_margin(end, exclude_interior_tracks))  
+    if start_in_av_interior or end_in_av_interior:
+        return None 
+    return start, end
 
 
 def project_segment_to_detector_bounds(start, end, flipped=False):
@@ -332,8 +366,9 @@ def build_voxel_bounds(ndiv):
 
 
 def voxel_index(ix, iy, iz, ndiv):
-    """Flatten a voxel index with y varying fastest, matching the map output."""
-    return (iz * ndiv + ix) * ndiv + iy
+    """Flatten a voxel index with x varying fastest, matching the map output."""
+    return (iz * ndiv + iy) * ndiv + ix
+    # = ix + iy*ndiv + iz*pow(ndiv,2)
 
 
 def fill_track_row(
@@ -350,14 +385,14 @@ def fill_track_row(
     xbounds, ybounds, zbounds = bounds
 
     for iz in range(ndiv):
-        for ix in range(ndiv):
-            for iy in range(ndiv):
+        for iy in range(ndiv):
+            for ix in range(ndiv):
                 hit = ROOT.liang_barsky_3d_py(
+                    xbounds[ix], xbounds[ix + 1],
                     ybounds[iy], ybounds[iy + 1],
                     zbounds[iz], zbounds[iz + 1],
-                    xbounds[ix], xbounds[ix + 1],
-                    entry_point[1], entry_point[2], entry_point[0],
-                    exit_point[1], exit_point[2], exit_point[0],
+                    entry_point[0], entry_point[1], entry_point[2],
+                    exit_point[0], exit_point[1], exit_point[2],
                 )
 
                 if all(hit[index] == NO_INTERSECTION for index in range(6)):
@@ -376,7 +411,7 @@ def fill_track_row(
 
 
 # def build_linear_system(trajectory_chain, photon_counts, ndiv, num_events):
-def build_linear_system(trajectory_table, ndiv, num_events):
+def build_linear_system(trajectory_table, ndiv, num_events, selection_file=None, exclude_interior_tracks_margin=-1):
     """Build the sparse physical system A x = b."""
     # exit_point = array("f", [0.0, 0.0, 0.0])
     # entry_point = array("f", [0.0, 0.0, 0.0])
@@ -394,17 +429,24 @@ def build_linear_system(trajectory_table, ndiv, num_events):
 
     tracks_used = 0 # necessary since we don't know how many tracks will end up used. 
     # for row_index in range(events_to_use):
-    for row_index, table_row in enumerate(trajectory_table.iterrows(start=0, stop=max_events_to_use)):
+    if selection_file is not None:
+        with open(selection_file,"r") as f:
+            entries_to_use = [int(entry_str) for entry_str in f.readlines()]
+        rows_to_iter = trajectory_table.itersequence(entries_to_use)
+    else:
+        rows_to_iter = trajectory_table.iterrows(start=0, stop=max_events_to_use)
+    for row_index, table_row in enumerate(rows_to_iter):
         # trajectory_chain.GetEntry(row_index)
         # key = (trajectory_chain.GetTreeNumber(), event_id[0])
         # b[row_index] = photon_counts.get(key, 0)
 
-        start_end_points = get_trajectory_start_end(table_row)
+        start_end_points = get_trajectory_start_end(table_row, exclude_interior_tracks=exclude_interior_tracks_margin)
         if start_end_points is None:
             continue  # If this trajectory is poor quality (points out of bounds, major stitching misalignment), skip it.
 
         b.append(table_row['total_npe']) # if this were above, b would get entries for rejected tracks and the shapes would be out of sync.
         entry_point, exit_point = project_segment_to_detector_bounds(*start_end_points)
+        # entry_point, exit_point = start_end_points   ## NO PROJECTION
 
         fill_track_row(
             # row_index,
@@ -445,8 +487,8 @@ def build_l2_smoothness_matrix(ndiv):
     edge = 0
 
     for iz in range(ndiv):
-        for ix in range(ndiv):
-            for iy in range(ndiv):
+        for iy in range(ndiv):
+            for ix in range(ndiv):
                 current = voxel_index(ix, iy, iz, ndiv)
                 neighbors = []
                 if ix + 1 < ndiv:
@@ -561,6 +603,8 @@ def main():
         trajectory_table,
         args.ndiv,
         args.num_events,
+        selection_file=args.entries_list,
+        exclude_interior_tracks_margin=args.interior_exclusion,
     )
     print(f"Sparse system: shape={A.shape}, nonzeros={A.nnz}")
 
