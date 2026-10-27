@@ -89,13 +89,12 @@ void pds_cal_plot()
     // float zmin = 0;
     // float zmax = 300;
 
-    const char* plots_dir = "solution_plots/12_fD_unreg_anode_crossers_int_point_chk_10_rc"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
+    const char* plots_dir = "solution_plots/12_fD_unreg_a_ac_ca_aca_intchk10_attempt2"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
+    // const char* plots_dir = "solution_plots_43993/12_fD_unreg_anode_crossers_int_point_chk_10_y_chk_12"; // plots_dir just stores a pointer to the first character of the string, used to access the rest. This is the string format taken in by printf (Form() in ROOT). Need to put const to suppress error.
 
 	std::vector<double> x;
-	//std::ifstream x_in("angelo2_12x12x12_60000evts_lambda3e6.txt");
-	// std::ifstream x_in("solutions/10x10x10_unregularized_fullD.txt");
-	std::ifstream x_in("solutions/12x12x12_unreg_fD_anode_crossers_int_point_chk_10_rc.txt");
-	// std::ifstream x_in("solutions/16x16x16_lambda500.txt");
+	std::ifstream x_in("solutions/12x12x12_unreg_fullD_anode_crosser_int_point_chk_10_attempt2.txt");
+	// std::ifstream x_in("solutions_43993/12x12x12_unreg_fD_anode_crossers_int_point_chk_10_y_chk_12.txt");
 
 	if (!x_in) {
     	std::cerr << "Error: could not open input file\n";

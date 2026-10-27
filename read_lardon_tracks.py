@@ -125,7 +125,7 @@ for reco_filename in reco_filenames:
 
     if "/track_counts" not in out_file:
         trk_ct_pair_dtype = np.dtype( [('all', 'i'), ('pds_cluster_matched', 'i')] )
-        trk_cts_dtype = np.dtype( [('filename', 'U32'), 
+        trk_cts_dtype = np.dtype( [('filename', 'U36'), 
                                    ('all_tracks_ct',            trk_ct_pair_dtype),   
                                    ('a_crossers_ct',            trk_ct_pair_dtype),
                                    ('c_crossers_ct',            trk_ct_pair_dtype),
@@ -165,7 +165,7 @@ for reco_filename in reco_filenames:
         get_tracks3d_field_formats = lambda field_name_list : [ tracks3d_table.coldescrs[fname] for fname in field_name_list ]
 
         out_field_names   = ["filename"]
-        out_field_formats = [tab.StringCol(itemsize=32)]
+        out_field_formats = [tab.StringCol(itemsize=36)]
         
         tracks3d_fields_to_get_once = ['event', 'trigger', 'cluster_ID', 'ID', 'cathode_crosser_ID'] 
         out_field_names   += tracks3d_fields_to_get_once
